@@ -2,31 +2,51 @@ import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
-budget_universe = np.arange(300, 7001, 1)
-assortment_universe = np.arange(5, 31, 1)
-crowdedness_universe = np.arange(0, 31, 1)
-target_universe = np.arange(1, 21, 1)
-
-budget = ctrl.Antecedent(np.arange(300, 7001, 1), 'budget')
-assortment = ctrl.Antecedent(np.arange(5, 31, 1), 'assortment')
-crowdedness = ctrl.Antecedent(np.arange(0, 31, 1), 'crowdedness')
-target = ctrl.Consequent(np.arange(1, 21, 1), 'target')
-
-budget['low'] = fuzz.trimf(budget_universe, [300, 500, 1000])
-budget['medium'] = fuzz.gauss2mf(budget_universe, 1500, 0.5, 3000, 0.5)
-budget['high'] = fuzz.trimf(budget_universe, [3000, 5000, 7000])
-
-assortment['small'] = fuzz.trimf(assortment_universe, [5, 10, 15])
-assortment['medium'] = fuzz.trapmf(assortment_universe, [10, 15, 20, 25])
-assortment['wide'] = fuzz.trimf(assortment_universe, [20, 25, 30])
-
-crowdedness['low'] = fuzz.trimf(crowdedness_universe, [0, 5, 8])
-crowdedness['medium'] = fuzz.gauss2mf(crowdedness_universe, 10, 0.5, 13, 0.5)
-crowdedness['high'] = fuzz.trimf(crowdedness_universe, [20, 25, 30])
-
+budgetMin = 300
+budgetMax = 7000
+assortmentMin = 5
+assortmentMax = 30
+crowdednessMin = 0
+crowdednessMax = 30
 barNames = ["Дом Ани", "Пьяная Свинья", "Бюро Дезинформации", "KillFish", "Цех этого города", "Видеосалон Закрыт", "Руки Вверх", "Harat's Pub", "Rock Bar", "Urban Pub", "Sgt.Pepper's Bar", "Большая Рыба", "Раковая №1", "Архитектор Бар", "McKey", "La Villa", "Томми Ли", "Funky Food", "Holly Place", "Apollo Bar"]
-target.automf(20, names=barNames)
+
+
+budget_universe = np.arange(budgetMin, budgetMax + 1, 1)
+assortment_universe = np.arange(assortmentMin, assortmentMax + 1, 1)
+crowdedness_universe = np.arange(crowdednessMin, crowdednessMax + 1, 1)
+target_universe = np.arange(1, len(barNames) + 1, 1)
+
+with open("dataset.json", "r") as read_file:
+    data = json.load(read_file)
+
+budgetMean = np.mean(data['budget'])
+budgetStd = np.std(data['budget'])
+assortmentMean = np.mean(data['assortment'])
+assortmentStd = np.std(data['assortment'])
+crowdednessMean = np.mean(data['crowdedness'])
+crowdednessStd = np.std(data['crowdedness'])
+
+
+budget = ctrl.Antecedent(budget_universe, 'budget')
+assortment = ctrl.Antecedent(assortment_universe, 'assortment')
+crowdedness = ctrl.Antecedent(crowdedness_universe, 'crowdedness')
+target = ctrl.Consequent(target_universe, 'target')
+
+budget['low'] = fuzz.trapmf(budget_universe, [budgetMin, budgetMin, round(budgetMean - 1.5 * budgetStd), round(budgetMean - 0.5 * budgetStd)])
+budget['medium'] = fuzz.trapmf(budget_universe, [round(budgetMean - 1.5 * budgetStd), round(budgetMean - 0.5 * budgetStd), round(budgetMean + 0.5 * budgetStd), round(budgetMean + 1.5 * budgetStd)])
+budget['high'] = fuzz.trapmf(budget_universe, [round(budgetMean + 0.5 * budgetStd), round(budgetMean + 1.5 * budgetStd), budgetMax, budgetMax])
+
+assortment['small'] = fuzz.trapmf(assortment_universe, [assortmentMin, assortmentMin, round(assortmentMean - 1.5 * assortmentStd), round(assortmentMean - 0.5 * assortmentStd)])
+assortment['medium'] = fuzz.trapmf(assortment_universe, [round(assortmentMean - 1.5 * assortmentStd), round(assortmentMean - 0.5 * assortmentStd), round(assortmentMean + 0.5 * assortmentStd), round(assortmentMean + 1.5 * assortmentStd)])
+assortment['wide'] = fuzz.trapmf(assortment_universe, [round(assortmentMean + 0.5 * assortmentStd), round(assortmentMean + 1.5 * assortmentStd), assortmentMax, assortmentMax])
+
+crowdedness['low'] = fuzz.trapmf(crowdedness_universe, [crowdednessMin, crowdednessMin, round(crowdednessMean - 1.5 * crowdednessStd), round(crowdednessMean - 0.5 * crowdednessStd)])
+crowdedness['medium'] = fuzz.trapmf(crowdedness_universe, [round(crowdednessMean - 1.5 * crowdednessStd), round(crowdednessMean - 0.5 * crowdednessStd), round(crowdednessMean + 0.5 * crowdednessStd), round(crowdednessMean + 1.5 * crowdednessStd)])
+crowdedness['high'] = fuzz.trapmf(crowdedness_universe, [round(crowdednessMean + 0.5 * crowdednessStd), round(crowdednessMean + 1.5 * crowdednessStd), crowdednessMax, crowdednessMax])
+
+target.automf(len(barNames), names=barNames)
 
 budget.view()
 assortment.view()
