@@ -48,6 +48,13 @@ crowdedness['high'] = fuzz.trapmf(crowdedness_universe, [round(crowdednessMean +
 
 target.automf(len(barNames), names=barNames)
 
+print("Введите ваш бюджет:")
+x = input()
+print("Введите желаемое количество напитков:")
+y = input()
+print("Введите желаемое количество людей в баре:")
+z = input()
+
 budget.view()
 assortment.view()
 crowdedness.view()
@@ -102,15 +109,20 @@ bar_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6, rule7, 
                                rule12, rule13, rule14, rule15, rule16, rule17, rule18, rule19])
 bar_choice = ctrl.ControlSystemSimulation(bar_ctrl)
 
-bar_choice.input['budget'] = 700
-bar_choice.input['assortment'] = 15
-bar_choice.input['crowdedness'] = 5
+bar_choice.input['budget'] = int(x)
+bar_choice.input['assortment'] = int(y)
+bar_choice.input['crowdedness'] = int(z)
 
 
 bar_choice.compute()
 print(bar_choice.output['target'])
 print(barNames[int(round(bar_choice.output['target'])) - 1])
 target.view(sim=bar_choice)
+data["budget"].append(int(x))
+data["assortment"].append(int(y))
+data["crowdedness"].append(int(z))
+with open("dataset.json", "w") as write_file:
+    json.dump(data, write_file)
 plt.show()
 
 

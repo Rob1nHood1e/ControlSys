@@ -1,0 +1,45 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import skfuzzy as fuzz\r\nfrom skfuzzy import control as ctrl\r\nimport numpy as np\r\nimport matplotlib.pyplot as plt\r\n\r\nbudget_universe = np.arange(300, 7001, 1)\r\nassortment_universe = np.arange(5, 31, 1)\r\ncrowdedness_universe = np.arange(0, 31, 1)\r\ntarget_universe = np.arange(1, 21, 1)\r\n\r\nbudget = ctrl.Antecedent(np.arange(300, 7001, 1), 'budget')\r\nassortment = ctrl.Antecedent(np.arange(5, 31, 1), 'assortment')\r\ncrowdedness = ctrl.Antecedent(np.arange(0, 31, 1), 'crowdedness')\r\ntarget = ctrl.Consequent(np.arange(1, 21, 1), 'target')\r\n\r\nbudget['low'] = fuzz.trimf(budget_universe, [300, 500, 1000])\r\nbudget['medium'] = fuzz.gauss2mf(budget_universe, 1500, 0.5, 3000, 0.5)\r\nbudget['high'] = fuzz.trimf(budget_universe, [3000, 5000, 7000])\r\n\r\nassortment['low'] = fuzz.trimf(assortment_universe, [5, 10, 15])\r\nassortment['medium'] = fuzz.trapmf(assortment_universe, [10, 15, 20, 25])\r\nassortment['high'] = fuzz.trimf(assortment_universe, [20, 25, 30])\r\n\r\ncrowdedness['low'] = fuzz.trimf(crowdedness_universe, [0, 5, 8])\r\ncrowdedness['medium'] = fuzz.gauss2mf(crowdedness_universe, 10, 0.5, 13, 0.5)\r\ncrowdedness['high'] = fuzz.trimf(crowdedness_universe, [20, 25, 30])\r\n\r\nbarNames = [\"а\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\", \"j\", \"k\", \"l\", \"m\", \"n\", \"o\", \"p\", \"q\", \"r\", \"s\", \"t\"]\r\ntarget.automf(20, names=barNames)\r\n\r\nbudget.view()\r\nassortment.view()\r\ncrowdedness.view()\r\ntarget.view()\r\nplt.show()
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	(revision 31814829619aa7bcbca4192245c5b87a2768fabd)
++++ b/main.py	(date 1633463629613)
+@@ -2,12 +2,21 @@
+ from skfuzzy import control as ctrl
+ import numpy as np
+ import matplotlib.pyplot as plt
++import json
+ 
+ budget_universe = np.arange(300, 7001, 1)
+ assortment_universe = np.arange(5, 31, 1)
+ crowdedness_universe = np.arange(0, 31, 1)
+ target_universe = np.arange(1, 21, 1)
+ 
++with open("dataset.json", "r") as read_file:
++    data = json.load(read_file)
++
++print(data['assortment'])
++print(np.mean(data['assortment']))
++print(np.mean(data['assortment']) + 2 * np.std(data['assortment']))
++print(np.std(data['assortment']))
++
+ budget = ctrl.Antecedent(np.arange(300, 7001, 1), 'budget')
+ assortment = ctrl.Antecedent(np.arange(5, 31, 1), 'assortment')
+ crowdedness = ctrl.Antecedent(np.arange(0, 31, 1), 'crowdedness')
+@@ -17,9 +26,9 @@
+ budget['medium'] = fuzz.gauss2mf(budget_universe, 1500, 0.5, 3000, 0.5)
+ budget['high'] = fuzz.trimf(budget_universe, [3000, 5000, 7000])
+ 
+-assortment['low'] = fuzz.trimf(assortment_universe, [5, 10, 15])
+-assortment['medium'] = fuzz.trapmf(assortment_universe, [10, 15, 20, 25])
+-assortment['high'] = fuzz.trimf(assortment_universe, [20, 25, 30])
++assortment['low'] = fuzz.trapmf(assortment_universe, [5, 10, 15])
++assortment['medium'] = fuzz.trapmf(assortment_universe, [round((np.mean(data['assortment']) - 1.5 * np.std(data['assortment']))), round((np.mean(data['assortment']) - 0.5 * np.std(data['assortment']))), round((np.mean(data['assortment']) + 0.5 * np.std(data['assortment']))), round((np.mean(data['assortment']) + 1.5 * np.std(data['assortment'])))])
++assortment['high'] = fuzz.trapmf(assortment_universe, [round((np.mean(data['assortment']) + 0.5 * np.std(data['assortment']))), round((np.mean(data['assortment']) + 1.5 * np.std(data['assortment']))), 30, 30])
+ 
+ crowdedness['low'] = fuzz.trimf(crowdedness_universe, [0, 5, 8])
+ crowdedness['medium'] = fuzz.gauss2mf(crowdedness_universe, 10, 0.5, 13, 0.5)
